@@ -1,40 +1,77 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
-// 1. Configuración de Valhalla Service
+// Configuración de Ragnarok (Auth Principal)
+const ragnarokConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_RAGNAROK_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_RAGNAROK_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_RAGNAROK_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_RAGNAROK_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_RAGNAROK_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_RAGNAROK_APP_ID
+};
+
+// Configuración de Valhalla Service
 const serviceConfig = {
-  apiKey: "AIzaSyAU5f7NM_CvxM_UU7CRIAfIdxT4gCOpEJE",
-  authDomain: "valhalla-service-c8523.firebaseapp.com",
-  projectId: "valhalla-service-c8523",
-  storageBucket: "valhalla-service-c8523.firebasestorage.app",
-  messagingSenderId: "955141773947",
-  appId: "1:955141773947:web:8173ed455b539434caa0de"
+  apiKey: import.meta.env.VITE_FIREBASE_SERVICE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_SERVICE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_SERVICE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_SERVICE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_SERVICE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_SERVICE_APP_ID
 };
 
-// 2. Configuración de Valhalla Express
+// Configuración de Valhalla Express
 const expressConfig = {
-  apiKey: "AIzaSyAwwUvJeU2se9Iv51W4zlrEvTiI97zzh7E",
-  authDomain: "valhalla-3f8d9.firebaseapp.com",
-  projectId: "valhalla-3f8d9",
-  storageBucket: "valhalla-3f8d9.firebasestorage.app",
-  messagingSenderId: "250806874015",
-  appId: "1:250806874015:web:d4c4efd9fb1516e3b817aa"
+  apiKey: import.meta.env.VITE_FIREBASE_EXPRESS_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_EXPRESS_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_EXPRESS_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_EXPRESS_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_EXPRESS_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_EXPRESS_APP_ID
 };
 
-// 3. Configuración de Valhalla Store
+// Configuración de Valhalla Store
 const storeConfig = {
-  apiKey: "AIzaSyDpPrbA0EIYesjtjA-_lglN5CURR-w5FJA",
-  authDomain: "valhalla-store-ff5f0.firebaseapp.com",
-  projectId: "valhalla-store-ff5f0",
-  storageBucket: "valhalla-store-ff5f0.firebasestorage.app",
-  messagingSenderId: "165476949219",
-  appId: "1:165476949219:web:ad67e6c13df7840091b9d6"
+  apiKey: import.meta.env.VITE_FIREBASE_STORE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_STORE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_STORE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_STORE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_STORE_APP_ID
 };
 
+// Inicialización de Apps de Firebase
+const appRagnarok = initializeApp(ragnarokConfig, "appRagnarok");
 const appService = initializeApp(serviceConfig, "appService");
 const appExpress = initializeApp(expressConfig, "appExpress");
 const appStore = initializeApp(storeConfig, "appStore");
 
+// Instancia de Autenticación ligada a Ragnarok (Restringida estrictamente al jefe)
+export const auth = getAuth(appRagnarok);
+const googleProvider = new GoogleAuthProvider();
+
+export const loginWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    
+    // Validación estricta de seguridad por correo del jefe
+    if (user.email !== 'gfabian395@gmail.com') {
+      await signOut(auth);
+      throw new Error("Acceso denegado. Este panel es exclusivo del administrador maestro.");
+    }
+    return user;
+  } catch (error) {
+    console.error("Error en autenticación:", error.message);
+    throw error;
+  }
+};
+
+export const logoutAdmin = () => signOut(auth);
+
+// Instancias de Firestore para los 3 proyectos
 export const dbService = getFirestore(appService);
 export const dbExpress = getFirestore(appExpress);
 export const dbStore = getFirestore(appStore);

@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Store, CreditCard, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, Store, CreditCard, LogOut } from 'lucide-react';
 
-export const Sidebar = () => {
+export const Sidebar = ({ onLogout }) => {
   const navItems = [
     { name: 'Dashboard', path: '/', icon: LayoutDashboard },
     { name: 'Locales / Tenants', path: '/tenants', icon: Store },
@@ -10,7 +10,7 @@ export const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-64 glass-card border-r border-white/10 flex flex-col justify-between 'hidden' md:flex shrink-0">
+    <aside className="w-64 glass-card border-r border-white/10 flex flex-col justify-between hidden md:flex shrink-0">
       <div>
         {/* Header del Sidebar */}
         <div className="p-6 flex items-center gap-3 border-b border-white/10">
@@ -39,7 +39,7 @@ export const Sidebar = () => {
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                     isActive
-                      ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30 shadow-lg shadow-rose-900/20'
+                      ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30 shadow-lg shadow-rose-950'
                       : 'text-slate-400 hover:text-white hover:bg-white/5'
                   }`
                 }
@@ -52,8 +52,8 @@ export const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Footer del Sidebar */}
-      <div className="p-4 border-t border-white/10">
+      {/* Footer del Sidebar con el botón de Cerrar Sesión */}
+      <div className="p-4 border-t border-white/10 space-y-3">
         <div className="glass-card p-3 rounded-xl flex items-center gap-3">
           <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
           <div>
@@ -61,6 +61,14 @@ export const Sidebar = () => {
             <p className="text-[10px] text-slate-400">Control Total Activo</p>
           </div>
         </div>
+
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition text-xs font-bold uppercase tracking-wider cursor-pointer"
+        >
+          <LogOut className="w-4 h-4" />
+          Cerrar Sesión
+        </button>
       </div>
     </aside>
   );
