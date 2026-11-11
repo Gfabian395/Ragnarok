@@ -20,9 +20,11 @@ export const TenantsManager = () => {
   }, []);
 
   const handleToggle = async (tenant) => {
-    const success = await toggleTenantStatus(tenant.project, tenant.id, tenant.isActive);
+    // Determinamos el estado actual basado en 'status' o 'isActive'
+    const currentState = tenant.status ?? tenant.isActive ?? false;
+    const success = await toggleTenantStatus(tenant.project, tenant.id, currentState);
     if (success) {
-      setTenants(prev => prev.map(t => t.id === tenant.id ? { ...t, isActive: !t.isActive } : t));
+      setTenants(prev => prev.map(t => t.id === tenant.id ? { ...t, status: !currentState, isActive: !currentState } : t));
     }
   };
 
@@ -58,152 +60,155 @@ export const TenantsManager = () => {
         <>
           {/* VISTA MÓVIL: Tarjetas Minimalistas */}
           <div className="grid grid-cols-1 gap-3 md:hidden">
-            {filteredTenants.map((tenant) => (
-              <div key={tenant.id} className="glass-card p-4 rounded-2xl border border-white/10 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-sm font-bold text-white">{tenant.name}</h3>
-                    <p className="text-xs text-slate-400">{tenant.owner}</p>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300">
-                    {tenant.type}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5 text-xs">
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Alta</span>
-                    <span className="font-bold text-emerald-400">${tenant.precioUnico?.toLocaleString('es-AR')}</span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 block">Mensual</span>
-                    <span className="font-bold text-sky-400">${tenant.mantenimientoMensual?.toLocaleString('es-AR')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-2.5 h-2.5 rounded-full ${tenant.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
-                    <span className={`text-xs font-semibold ${tenant.isActive ? 'text-emerald-400' : 'text-amber-400'}`}>
-                      {tenant.isActive ? 'Activo' : 'Pendiente'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {tenant.phone && (
-                      <a
-                        href={`https://wa.me/${tenant.phone.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </a>
-                    )}
-                    <button
-                      onClick={() => handleToggle(tenant)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ${
-                        tenant.isActive 
-                          ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30' 
-                          : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
-                      }`}
-                    >
-                      <Power className="w-3.5 h-3.5" />
-                      {tenant.isActive ? 'Apagar' : 'Activar'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* VISTA ESCRITORIO: Tabla Clásica */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredTenants.map((tenant, index) => (
-              <motion.div
-                key={tenant.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col justify-between border border-white/10 bg-slate-900/40 backdrop-blur-xl"
-              >
-                <div>
+            {filteredTenants.map((tenant) => {
+              const isActive = tenant.status ?? tenant.isActive ?? false;
+              return (
+                <div key={tenant.id} className="glass-card p-4 rounded-2xl border border-white/10 space-y-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-rose-400">
-                        <StoreIcon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">{tenant.name}</h3>
-                        <p className="text-xs text-slate-400">{tenant.owner} // {tenant.email || 'Sin email'}</p>
-                      </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">{tenant.name}</h3>
+                      <p className="text-xs text-slate-400">{tenant.owner}</p>
                     </div>
-                    <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300">
                       {tenant.type}
                     </span>
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                  <div className="grid grid-cols-2 gap-2 bg-white/5 p-2.5 rounded-xl border border-white/5 text-xs">
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Alta (Pago Único)</span>
-                      <span className="text-sm font-bold text-emerald-400 flex items-center gap-1">
-                        <DollarSign className="w-3.5 h-3.5" /> {tenant.precioUnico?.toLocaleString('es-AR')}
-                      </span>
+                      <span className="text-[10px] text-slate-400 block">Alta</span>
+                      <span className="font-bold text-emerald-400">${tenant.planPrice?.toLocaleString('es-AR') || tenant.precioUnico?.toLocaleString('es-AR') || 0}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Mantenimiento</span>
-                      <span className="text-sm font-bold text-sky-400 flex items-center gap-1">
-                        <DollarSign className="w-3.5 h-3.5" /> {tenant.mantenimientoMensual?.toLocaleString('es-AR')} /mes
-                      </span>
+                      <span className="text-[10px] text-slate-400 block">Mensual</span>
+                      <span className="font-bold text-sky-400">${tenant.planMaintenance?.toLocaleString('es-AR') || tenant.mantenimientoMensual?.toLocaleString('es-AR') || 0}</span>
                     </div>
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" /> Alta: {tenant.createdAt}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" /> Vence: {tenant.dueDate}
-                    </span>
-                  </div>
-                </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
+                      <span className={`text-xs font-semibold ${isActive ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {isActive ? 'Activo' : 'Pendiente'}
+                      </span>
+                    </div>
 
-                <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${tenant.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
-                    <span className={`text-xs font-semibold ${tenant.isActive ? 'text-emerald-400' : 'text-amber-400'}`}>
-                      {tenant.isActive ? 'Activo' : 'Pendiente / Inactivo'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {tenant.phone && (
-                      <a
-                        href={`https://wa.me/${tenant.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(tenant.owner)},%20te%20contacto%20desde%20Ragnarok.`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition"
-                        title="Enviar WhatsApp"
+                    <div className="flex items-center gap-2">
+                      {tenant.phone && (
+                        <a
+                          href={`https://wa.me/${tenant.phone.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleToggle(tenant)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 ${
+                          isActive 
+                            ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30' 
+                            : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30'
+                        }`}
                       >
-                        <MessageCircle className="w-4 h-4" />
-                      </a>
-                    )}
-
-                    <button
-                      onClick={() => handleToggle(tenant)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
-                        tenant.isActive
-                          ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30'
-                          : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30'
-                      }`}
-                    >
-                      <Power className="w-4 h-4" />
-                      <span>{tenant.isActive ? 'Deshabilitar' : 'Aprobar y Activar'}</span>
-                    </button>
+                        <Power className="w-3.5 h-3.5" />
+                        {isActive ? 'Apagar' : 'Activar'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+              );
+            })}
+          </div>
+
+          {/* VISTA ESCRITORIO: Tabla Clásica */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredTenants.map((tenant, index) => {
+              const isActive = tenant.status ?? tenant.isActive ?? false;
+              return (
+                <motion.div
+                  key={tenant.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="glass-card glass-card-hover p-6 rounded-2xl flex flex-col justify-between border border-white/10 bg-slate-900/40 backdrop-blur-xl"
+                >
+                  <div>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-rose-400">
+                          <StoreIcon className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-white">{tenant.name}</h3>
+                          <p className="text-xs text-slate-400">{tenant.ownerName || tenant.owner} // {tenant.ownerEmail || tenant.email || 'Sin email'}</p>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-300 uppercase tracking-wider">
+                        {tenant.type || tenant.planName || 'Comercio'}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Alta (Pago Único)</span>
+                        <span className="text-sm font-bold text-emerald-400 flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5" /> {tenant.planPrice?.toLocaleString('es-AR') || tenant.precioUnico?.toLocaleString('es-AR') || 0}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Mantenimiento</span>
+                        <span className="text-sm font-bold text-sky-400 flex items-center gap-1">
+                          <DollarSign className="w-3.5 h-3.5" /> {tenant.planMaintenance?.toLocaleString('es-AR') || tenant.mantenimientoMensual?.toLocaleString('es-AR') || 0} /mes
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between text-xs text-slate-400 px-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" /> Alta: {tenant.createdAt ? new Date(tenant.createdAt?.seconds ? tenant.createdAt.seconds * 1000 : tenant.createdAt).toLocaleDateString('es-AR') : '---'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></div>
+                      <span className={`text-xs font-semibold ${isActive ? 'text-emerald-400' : 'text-amber-400'}`}>
+                        {isActive ? 'Activo' : 'Pendiente / Inactivo'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {tenant.phone && (
+                        <a
+                          href={`https://wa.me/${tenant.phone.replace(/\D/g, '')}?text=Hola%20${encodeURIComponent(tenant.ownerName || tenant.owner || '')},%20te%20contacto%20desde%20Ragnarok.`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-2 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 transition"
+                          title="Enviar WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </a>
+                      )}
+
+                      <button
+                        onClick={() => handleToggle(tenant)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg cursor-pointer ${
+                          isActive
+                            ? 'bg-rose-600/20 text-rose-400 border border-rose-500/30 hover:bg-rose-600/30'
+                            : 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30'
+                        }`}
+                      >
+                        <Power className="w-4 h-4" />
+                        <span>{isActive ? 'Deshabilitar' : 'Aprobar y Activar'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </>
       )}

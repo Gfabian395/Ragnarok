@@ -21,6 +21,9 @@ export const TenantDetail = () => {
   if (loading) return <div className="text-slate-400 p-8 text-sm">Cargando detalles del local...</div>;
   if (!tenant) return <div className="text-rose-400 p-8 text-sm">No se encontró el comercio especificado.</div>;
 
+  // 🔴 Mapeo seguro: leemos status (o isActive como respaldo por compatibilidad)
+  const isTenantActive = tenant.status ?? tenant.isActive ?? false;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -52,8 +55,8 @@ export const TenantDetail = () => {
         </div>
         <div className="space-y-1">
           <span className="text-xs text-slate-400 font-medium">Estado del Sistema</span>
-          <p className={`text-sm font-bold ${tenant.isActive ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {tenant.isActive ? 'Activo (Operativo)' : 'Suspendido (Bloqueado)'}
+          <p className={`text-sm font-bold ${isTenantActive ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {isTenantActive ? 'Activo (Operativo)' : 'Suspendido (Bloqueado)'}
           </p>
         </div>
       </div>
