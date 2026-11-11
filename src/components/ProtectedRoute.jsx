@@ -1,11 +1,9 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-export const ProtectedRoute = ({ children }) => {
-  const { isBoss } = useAuth();
-
-  if (!isBoss) {
+export const ProtectedRoute = ({ user, children }) => {
+  // Verificación estricta del correo del jefe maestro
+  if (!user || user.email !== 'gfabian395@gmail.com') {
     return <Navigate to="/" replace />;
   }
 

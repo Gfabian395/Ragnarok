@@ -30,7 +30,7 @@ export const Login = ({ onLoginSuccess }) => {
       <motion.div 
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="glass-card w-full max-w-md p-8 rounded-3xl border border-white/10 shadow-2xl relative z-10 text-center"
+        className="glass-card w-full max-w-md p-6 sm:p-8 rounded-3xl border border-white/10 shadow-2xl relative z-10 text-center"
       >
         <div className="flex justify-center mb-6">
           <div className="w-20 h-20 rounded-2xl p-2 bg-linear-to-br from-rose-600/20 to-indigo-600/20 border border-rose-500/30 flex items-center justify-center shadow-xl shadow-rose-950">
@@ -38,6 +38,7 @@ export const Login = ({ onLoginSuccess }) => {
               src="/Ragnarok.png" 
               alt="Ragnarok Master Panel Logo" 
               className="w-full h-full object-contain"
+              onError={(e) => { e.target.style.display = 'none'; }}
             />
           </div>
         </div>
@@ -58,9 +59,9 @@ export const Login = ({ onLoginSuccess }) => {
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full py-3.5 px-4 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-100 transition shadow-lg flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50"
+          className="w-full py-3.5 px-4 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-100 transition shadow-lg flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 text-sm sm:text-base"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
             <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.19v3.15C3.17 21.35 7.22 24 12 24z"/>
             <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.19C.43 8.12 0 9.87 0 11.7s.43 3.58 1.19 5.12l4.09-2.55z"/>

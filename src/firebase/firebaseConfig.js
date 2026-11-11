@@ -114,7 +114,7 @@ export const fetchAllTenants = async () => {
     const serviceSnap = await getDocs(collection(dbService, "comercios"));
     serviceSnap.forEach((docSnap) => {
       const data = docSnap.data();
-      const isActive = data.status !== undefined ? Boolean(data.status) : true;
+      const isActive = data.status !== undefined ? Boolean(data.status) : false;
       const { createdStr, dueStr } = parseDates(data.createdAt);
 
       allTenants.push({
@@ -125,7 +125,8 @@ export const fetchAllTenants = async () => {
         owner: data.ownerName || "Desconocido",
         phone: data.phone || "",
         email: data.ownerEmail || "",
-        price: data.planPrice || 20000,
+        precioUnico: 80000, // Plan Único Valhalla Service (Alta inicial)
+        mantenimientoMensual: 40000, // Cuota mensual
         isActive,
         createdAt: createdStr,
         dueDate: dueStr,
@@ -140,7 +141,7 @@ export const fetchAllTenants = async () => {
     const expressSnap = await getDocs(collection(dbExpress, "comercios"));
     expressSnap.forEach((docSnap) => {
       const data = docSnap.data();
-      const isActive = data.activo !== undefined ? Boolean(data.activo) : true;
+      const isActive = data.activo !== undefined ? Boolean(data.activo) : false;
       const { createdStr, dueStr } = parseDates(data.createdAt);
 
       allTenants.push({
@@ -151,7 +152,8 @@ export const fetchAllTenants = async () => {
         owner: data.ownerName || "Desconocido",
         phone: data.phone || "",
         email: data.ownerEmail || "",
-        price: 15000,
+        precioUnico: 100000, // Valhalla Express Pro (Alta inicial)
+        mantenimientoMensual: 50000, // Cuota mensual
         isActive,
         createdAt: createdStr,
         dueDate: dueStr,
@@ -161,12 +163,12 @@ export const fetchAllTenants = async () => {
     console.error("Error Express:", error.message);
   }
 
-  // 3. Store
+  // 3. Store (Mapeo corregido con campos reales: nombreComercio, whatsapp, etc.)
   try {
     const storeSnap = await getDocs(collection(dbStore, "comercios"));
     storeSnap.forEach((docSnap) => {
       const data = docSnap.data();
-      const isActive = data.activo !== undefined ? Boolean(data.activo) : true;
+      const isActive = data.activo !== undefined ? Boolean(data.activo) : false;
       const { createdStr, dueStr } = parseDates(data.createdAt);
 
       allTenants.push({
@@ -174,10 +176,11 @@ export const fetchAllTenants = async () => {
         project: "store",
         name: data.nombreComercio || data.name || "Sin nombre",
         type: "Store",
-        owner: data.ownerName || "Desconocido",
+        owner: data.ownerName || data.ownerEmail || "Desconocido",
         phone: data.whatsapp || data.phone || "",
         email: data.ownerEmail || "",
-        price: 20000,
+        precioUnico: 100000, // Valhalla Store Pro (Alta inicial)
+        mantenimientoMensual: 50000, // Cuota mensual
         isActive,
         createdAt: createdStr,
         dueDate: dueStr,
